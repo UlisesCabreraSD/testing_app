@@ -8,6 +8,7 @@ app.use(cors());
 
 let count = 0;
 let countError = 0;
+const url = 'http://:30006/resultados/test';
 
 async function test() {
     for (let i = 0; i < 8000; i++) {
