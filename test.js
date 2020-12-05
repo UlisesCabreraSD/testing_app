@@ -1,32 +1,33 @@
-const express = require('express');
-const app = express();
-const cors = require('cors');
 const axios = require('axios').default
+const express = require('express');
+const asyncify = require('express-asyncify')
+const bodyParser = require('body-parser')
+const compression = require('compression')
+const cors = require('cors')
 
-app.use(express.json());
-app.use(cors());
+function start () {
+    const app = asyncify(express());
+    const http = require('http').createServer(app);
+    app.use(compression());
+    app.use(cors())
+    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.json());
+    app.set('port', 3010);
 
-let count = 0;
-let countError = 0;
-const url = 'http://:30006/resultados/test';
+    app.use((err, req, res, next) => {
+        if (err.message.match(/not found/)) {
+            return res.status(404).send({ error: err.message });
+        }
+        res.status(500).send({error: err.message});
+    });
 
-async function test() {
-    for (let i = 0; i < 8000; i++) {
-        axios({
-            method: 'POST',
-            url: url,
-            timeout: 60000
-        }).then(()=> {
-            count++;
-            console.log('Cantidad bien: ', count)
-        }).catch(error => {
-            countError++;
-            console.log('Cantidad de errores: ', countError)
-        });
-    }
-    console.log('Cantidad bien: ', count)
-    console.log('Cantidad de errores: ', countError)
+    app.get('/test', (req, res) => {
+        res.sendStatus(200);
+    });
+
+    return http.listen(app.get('port'), function () {
+        console.log(`Your app is listening on port ${app.get('port')}`);
+    });
 }
 
-test();
-
+start();
