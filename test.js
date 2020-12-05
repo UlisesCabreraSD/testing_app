@@ -2,6 +2,7 @@ const axios = require('axios').default
 const express = require('express');
 const asyncify = require('express-asyncify')
 const bodyParser = require('body-parser')
+const cluster = require('express-cluster')
 const compression = require('compression')
 const cors = require('cors')
 
@@ -30,4 +31,6 @@ function start () {
     });
 }
 
-start();
+cluster(function () {
+    start()
+  }
